@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import firebaseAuth from '@react-native-firebase/auth';
-import { useStore, AppUser, LOCAL_USER } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
 import { healthCheck } from '@/services/api';
 import { Colors } from '@/constants/colors';
 
@@ -14,7 +14,9 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const { loadFromStorage, darkMode, setUser, addDebugLog, setServerStatus } = useStore();
   const hasSeenOnboarding = useStore((s) => s.hasSeenOnboarding);
-  const [authUser, setAuthUser] = useState<AppUser | null | undefined>(undefined);
+  const user = useStore((s) => s.user);
+  // `undefined` = Firebase hasn't resolved yet; `null`/value = resolved.
+  const [authResolved, setAuthResolved] = useState(false);
   const [storageLoaded, setStorageLoaded] = useState(false);
   const firebaseAvailable = useRef(true);
   const router = useRouter();
@@ -43,32 +45,27 @@ export default function RootLayout() {
   useEffect(() => {
     let unsub: (() => void) | undefined;
     const timeout = setTimeout(() => {
-      setAuthUser((current) => {
-        if (current === undefined) {
-          addDebugLog('Auth never resolved in 5s — continuing as local demo user');
-          firebaseAvailable.current = false;
-          setUser(LOCAL_USER);
-          return LOCAL_USER;
-        }
-        return current;
-      });
+      // Firebase never called back — treat as "resolved, signed out". The user
+      // can still sign in or continue without an account from /login.
+      addDebugLog('Auth did not resolve in 5s — treating as signed out');
+      firebaseAvailable.current = false;
+      setAuthResolved(true);
     }, 5000);
 
     try {
       unsub = firebaseAuth().onAuthStateChanged((u: any) => {
         clearTimeout(timeout);
+        setAuthResolved(true);
         if (u) {
-          const mapped: AppUser = {
+          setUser({
             uid: u.uid,
             name: u.displayName,
             email: u.email,
             photo: u.photoURL,
             isGuest: !!u.isAnonymous,
-          };
-          setAuthUser(mapped);
-          setUser(mapped);
-        } else {
-          setAuthUser(null);
+          });
+        } else if (useStore.getState().user?.uid !== 'local') {
+          // Don't clobber a local "continue without an account" session.
           setUser(null);
         }
       });
@@ -76,8 +73,7 @@ export default function RootLayout() {
       clearTimeout(timeout);
       addDebugLog(`Firebase unavailable (${e?.message ?? e}) — local demo mode`);
       firebaseAvailable.current = false;
-      setAuthUser(LOCAL_USER);
-      setUser(LOCAL_USER);
+      setAuthResolved(true);
     }
 
     return () => {
@@ -86,15 +82,15 @@ export default function RootLayout() {
     };
   }, []);
 
-  // Routing guard
+  // Routing guard — store `user` is the source of truth for "signed in".
   useEffect(() => {
-    if (!navState?.key || authUser === undefined || !storageLoaded) return;
+    if (!navState?.key || !authResolved || !storageLoaded) return;
     SplashScreen.hideAsync();
 
     const inOnboarding = segments[0] === 'onboarding';
     const inLogin = segments[0] === 'login';
 
-    if (!authUser) {
+    if (!user) {
       if (!inLogin) router.replace('/login');
       return;
     }
@@ -105,7 +101,7 @@ export default function RootLayout() {
     if (inLogin || inOnboarding) {
       router.replace('/(tabs)');
     }
-  }, [authUser, segments, navState?.key, storageLoaded, hasSeenOnboarding]);
+  }, [user, segments, navState?.key, storageLoaded, authResolved, hasSeenOnboarding]);
 
   const theme = darkMode ? Colors.dark : Colors.light;
 
