@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "MediVision AI",
+    "slug": "medivision-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "medivision",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#040d14"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.medivisionai.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#040d14"
+      },
+      "package": "com.medivisionai.app",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-system-ui",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow MediVision AI to use the camera to capture a chest X-ray image for a live model demo."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow MediVision AI to access your photos to run a chest X-ray through the model."
+        }
+      ],
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    },
+    "owner": "subhamdivakar"
+  }
+}
