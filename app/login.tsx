@@ -188,13 +188,13 @@ export default function LoginScreen() {
               </Text>
 
               {googleConfigured && (
-                <TouchableOpacity style={[styles.googleBtn, { borderColor: theme.border }]} onPress={handleGoogle} disabled={googleLoading}>
+                <TouchableOpacity style={styles.googleBtn} onPress={handleGoogle} disabled={googleLoading} activeOpacity={0.85}>
                   {googleLoading ? (
-                    <ActivityIndicator size="small" color={theme.primary} />
+                    <ActivityIndicator size="small" color="#1f1f1f" />
                   ) : (
                     <>
                       <Image source={{ uri: 'https://www.google.com/favicon.ico' }} style={styles.googleIcon} />
-                      <Text style={[styles.googleBtnText, { color: theme.text }]}>Continue with Google</Text>
+                      <Text style={styles.googleBtnText}>Continue with Google</Text>
                     </>
                   )}
                 </TouchableOpacity>
@@ -276,10 +276,12 @@ const styles = StyleSheet.create({
   welcomeSub: { fontSize: 14, lineHeight: 21 },
   googleBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12,
-    backgroundColor: '#fff', borderWidth: 1, borderRadius: 14, paddingVertical: 15, minHeight: 54,
+    // White in both themes (Google's sign-in button spec), so the label is a fixed dark colour.
+    backgroundColor: '#fff', borderWidth: 1, borderColor: '#dadce0', borderRadius: 14, paddingVertical: 15, minHeight: 54,
+    elevation: 2, shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 4, shadowOffset: { width: 0, height: 1 },
   },
   googleIcon: { width: 22, height: 22 },
-  googleBtnText: { fontSize: 16, fontWeight: '700' },
+  googleBtnText: { fontSize: 16, fontWeight: '700', color: '#1f1f1f' },
   emailBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
     borderRadius: 14, paddingVertical: 15, minHeight: 54,
