@@ -117,9 +117,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <LinearGradient colors={[theme.primaryDark, theme.primary, theme.primaryLight]} style={styles.hero}>
-        <View style={styles.iconWrap}>
-          <Ionicons name="add" size={52} color="#fff" />
-        </View>
+        <Image source={require('@/assets/images/logo-mark.png')} style={styles.iconWrap} />
         <Text style={styles.appName}>MediVision AI</Text>
         <Text style={styles.tagline}>Live chest X-ray model demos</Text>
       </LinearGradient>
@@ -269,8 +267,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   hero: { alignItems: 'center', paddingTop: 44, paddingBottom: 44, borderBottomLeftRadius: 36, borderBottomRightRadius: 36 },
   iconWrap: {
-    width: 90, height: 90, borderRadius: 26, backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center', justifyContent: 'center', marginBottom: 14,
+    width: 104, height: 104, borderRadius: 52, marginBottom: 14,
   },
   appName: { fontSize: 32, fontWeight: '900', color: '#fff', letterSpacing: 0.5 },
   tagline: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 6 },

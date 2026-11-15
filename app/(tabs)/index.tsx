@@ -31,9 +31,7 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <LinearGradient colors={[theme.primaryDark, theme.primary]} style={styles.header}>
           <View style={styles.brandRow}>
-            <View style={styles.logoDot}>
-              <Ionicons name="add" size={16} color={theme.primary} />
-            </View>
+            <Image source={require('@/assets/images/logo-mark.png')} style={styles.logoDot} />
             <Text style={styles.headerTitle}>MediVision AI</Text>
           </View>
           <Text style={styles.headerSub}>Live demos of open chest X-ray models</Text>
@@ -54,7 +52,7 @@ export default function HomeScreen() {
             {[
               { label: 'Runs', value: totalRuns, color: theme.primary },
               { label: 'Positive findings', value: positiveFindings, color: theme.positive },
-              { label: 'Avg latency', value: avgMs ? `${avgMs}ms` : '—', color: theme.secondary },
+              { label: 'Avg latency', value: avgMs ? (avgMs >= 1000 ? `${(avgMs / 1000).toFixed(1)}s` : `${avgMs}ms`) : '—', color: theme.secondary },
             ].map((s) => (
               <Card key={s.label} style={styles.statCard}>
                 <Text style={[styles.statNum, { color: s.color }]}>{s.value}</Text>
@@ -160,7 +158,7 @@ const styles = StyleSheet.create({
   scroll: { paddingBottom: 28 },
   header: { padding: 28, paddingTop: 18, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, marginBottom: 4 },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  logoDot: { width: 28, height: 28, borderRadius: 9, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  logoDot: { width: 36, height: 36, borderRadius: 18 },
   headerTitle: { fontSize: 26, fontWeight: '800', color: '#fff' },
   headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.82)', marginTop: 6, marginBottom: 20 },
   ctaBtn: {
