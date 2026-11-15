@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#040d14"
+      "backgroundColor": "#0a1531"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -22,7 +22,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#040d14"
+        "backgroundColor": "#0a1531"
       },
       "package": "com.medivisionai.app",
       "versionCode": 1,
@@ -36,6 +36,7 @@
       "expo-system-ui",
       "@react-native-firebase/app",
       "@react-native-google-signin/google-signin",
+      "./plugins/withSigning",
       [
         "expo-camera",
         {

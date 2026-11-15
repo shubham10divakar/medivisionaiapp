@@ -17,18 +17,19 @@ setup.
 
 1. Project settings → **Your apps → Add app → Android**.
 2. Package name: **`com.medivisionai.app`** (must match `app.json` → `android.package`).
-3. Add both signing SHA-1 fingerprints:
+3. **Add fingerprint** four times — SHA-1 and SHA-256 for each key (keystores live
+   in `..\keystores`, see `LOCAL_BUILD.md`):
 
-   ```powershell
-   # debug
-   & "C:\Program Files\Java\jdk-21.0.11\bin\keytool.exe" -list -v `
-     -keystore "$env:USERPROFILE\.android\debug.keystore" -alias androiddebugkey `
-     -storepass android -keypass android
-
-   # release — the keystore you'll create in LOCAL_BUILD.md
-   & "C:\Program Files\Java\jdk-21.0.11\bin\keytool.exe" -list -v `
-     -keystore "D:\...\medivision.keystore" -alias medivision
    ```
+   debug    SHA-1    99:26:50:DC:DD:9B:E4:C8:A1:5E:54:1A:65:CA:14:BE:8A:10:2C:29
+   debug    SHA-256  D8:20:55:60:98:19:D9:30:20:9C:35:C8:CF:7F:1D:D6:3D:D6:2B:C3:2E:B7:5D:50:3C:71:02:16:0D:80:06:18
+   release  SHA-1    B2:B1:BD:05:C4:BA:FC:0C:42:18:8A:34:97:4C:BC:D7:34:DA:61:BA
+   release  SHA-256  AF:94:00:2B:D5:AC:26:FB:54:89:E5:E1:5A:70:BA:65:D3:A3:50:DC:6E:DD:F5:8D:B3:C8:C5:CF:8C:E4:0F:34
+   ```
+
+   Re-print them with `cd android; .\gradlew :app:signingReport`. If the app goes
+   on Play with Play App Signing, also add the **App signing key** SHA-1/SHA-256
+   from Play Console → App integrity.
 
 4. Download **`google-services.json`**.
 
