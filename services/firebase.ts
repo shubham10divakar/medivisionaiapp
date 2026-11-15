@@ -73,6 +73,65 @@ export async function signOut() {
   await auth().signOut();
 }
 
+// ─── Account deletion ───────────────────────────────────────────────────────
+
+/** Thrown when Firebase wants a fresh sign-in before a sensitive operation. */
+export class RecentLoginRequiredError extends Error {
+  constructor() {
+    super('For your security, please sign out, sign in again, and then delete your account.');
+    this.name = 'RecentLoginRequiredError';
+  }
+}
+
+// Firebase rejects account deletion when the last sign-in is more than a few
+// minutes old. Check up front so we never delete the data and then fail to
+// delete the account itself.
+const RECENT_LOGIN_WINDOW_MS = 4 * 60 * 1000;
+
+/**
+ * Permanently deletes the signed-in user's cloud run history and then the
+ * Firebase Auth account. Feedback already submitted is create-only and is
+ * removed on request (see the privacy policy).
+ */
+export async function deleteAccount() {
+  const currentUser = auth().currentUser;
+  if (!currentUser) throw new Error('You are not signed in.');
+
+  const lastSignIn = currentUser.metadata?.lastSignInTime
+    ? new Date(currentUser.metadata.lastSignInTime).getTime()
+    : 0;
+  if (!currentUser.isAnonymous && Date.now() - lastSignIn > RECENT_LOGIN_WINDOW_MS) {
+    throw new RecentLoginRequiredError();
+  }
+
+  const userDoc = firestore().collection('users').doc(currentUser.uid);
+  for (;;) {
+    const snap = await userDoc.collection('runs').limit(200).get();
+    if (snap.empty) break;
+    const batch = firestore().batch();
+    snap.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+  }
+  await userDoc.delete().catch(() => {
+    /* no profile document, or rules only cover the runs subcollection */
+  });
+
+  const wasGoogle = currentUser.providerData.some((p) => p.providerId === 'google.com');
+  try {
+    await currentUser.delete();
+  } catch (e: any) {
+    if (e?.code === 'auth/requires-recent-login') throw new RecentLoginRequiredError();
+    throw e;
+  }
+  if (googleConfigured && wasGoogle) {
+    try {
+      await GoogleSignin.revokeAccess();
+    } catch {
+      /* already revoked */
+    }
+  }
+}
+
 // ─── Demo logging ───────────────────────────────────────────────────────────
 
 export interface CloudRunPayload {

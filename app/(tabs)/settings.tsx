@@ -12,7 +12,7 @@ import { Card } from '@/components/ui/Card';
 import { FeedbackModal } from '@/components/ui/FeedbackModal';
 import { MODELS } from '@/constants/models';
 import { healthCheck } from '@/services/api';
-import { signOut } from '@/services/firebase';
+import { signOut, deleteAccount } from '@/services/firebase';
 
 const APP_VERSION = '1.0.0';
 
@@ -21,13 +21,14 @@ export default function SettingsScreen() {
   const router = useRouter();
   const {
     darkMode, toggleDarkMode, selectedModel, setModel,
-    apiUrl, setApiUrl, user, resetOnboarding, setUser,
+    apiUrl, setApiUrl, user, resetOnboarding, setUser, clearHistory,
   } = useStore();
 
   const [editingUrl, setEditingUrl] = useState(false);
   const [urlDraft, setUrlDraft] = useState(apiUrl);
   const [testState, setTestState] = useState<'idle' | 'ok' | 'fail'>('idle');
   const [feedbackVisible, setFeedbackVisible] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const isLocal = !user || user.uid === 'local';
 
@@ -46,6 +47,32 @@ export default function SettingsScreen() {
         },
       },
     ]);
+  }
+
+  function handleDeleteAccount() {
+    Alert.alert(
+      'Delete account',
+      'This permanently deletes your account, your cloud run history and the runs stored on this device. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              await deleteAccount();
+              clearHistory();
+              setUser(null);
+            } catch (e: any) {
+              Alert.alert('Could not delete account', e?.message ?? 'Please try again.');
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ],
+    );
   }
 
   async function testServer() {
@@ -125,6 +152,17 @@ export default function SettingsScreen() {
                 <TouchableOpacity style={[styles.outlineRow, { borderColor: theme.error }]} onPress={handleSignOut}>
                   <Ionicons name="log-out-outline" size={16} color={theme.error} />
                   <Text style={[styles.outlineRowText, { color: theme.error }]}>Sign out</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteRow}
+                  onPress={handleDeleteAccount}
+                  disabled={deleting}
+                  accessibilityRole="button"
+                >
+                  <Ionicons name="trash-outline" size={14} color={theme.textMuted} />
+                  <Text style={[styles.deleteRowText, { color: theme.textMuted }]}>
+                    {deleting ? 'Deleting account…' : 'Delete account'}
+                  </Text>
                 </TouchableOpacity>
               </>
             )}
@@ -276,6 +314,8 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: 16, gap: 8 },
   groupLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 1.1, marginTop: 16, marginBottom: 4, marginLeft: 2 },
   accountCard: { gap: 12 },
+  deleteRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 4 },
+  deleteRowText: { fontSize: 13, fontWeight: '600', textDecorationLine: 'underline' },
   accountRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatar: { width: 48, height: 48, borderRadius: 24 },
   avatarFallback: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
