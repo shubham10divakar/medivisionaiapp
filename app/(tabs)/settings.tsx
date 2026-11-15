@@ -291,6 +291,10 @@ export default function SettingsScreen() {
               <Ionicons name="globe-outline" size={18} color={theme.primary} />
               <Text style={[styles.link, { color: theme.primary }]}>medivisionai.in</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.linkRow} onPress={() => Linking.openURL('https://medivisionai.in/privacy.html')}>
+              <Ionicons name="shield-checkmark-outline" size={18} color={theme.primary} />
+              <Text style={[styles.link, { color: theme.primary }]}>Privacy policy</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.linkRow} onPress={() => Linking.openURL('https://pypi.org/project/xrayzoo/')}>
               <Ionicons name="cube-outline" size={18} color={theme.primary} />
               <Text style={[styles.link, { color: theme.primary }]}>xrayzoo on PyPI</Text>
